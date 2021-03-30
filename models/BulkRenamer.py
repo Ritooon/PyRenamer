@@ -13,6 +13,7 @@ class BulkRenamer():
     def displayBulkRenamer(self, window):
         # Global frame
         self.window_frame = tk.Frame(window, bg='#130f40')
+        self.window = window
 
         # Open directory button container
         top_frame = tk.Frame(self.window_frame)
@@ -29,6 +30,25 @@ class BulkRenamer():
 
     def preview(self):
         self.list_files(self.selected_dir, 'display_renamed_files')
+    
+    def success(self, nb_files_renamed):
+        # Create success popup
+        popSuccess = tk.Toplevel()
+        positionRight = int(popSuccess.winfo_screenwidth()/2 - popSuccess.winfo_reqwidth()/2)
+        positionDown = int(popSuccess.winfo_screenheight()/2 - popSuccess.winfo_reqheight()/2)
+        popSuccess.geometry("+{}+{}".format(positionRight, positionDown))
+        # Popup title
+        popSuccess.title('Success !')
+        # Popup text 
+        tk.Label(popSuccess, text='Succefully renamed {} files !'.format(nb_files_renamed)).pack(padx=10, pady=10)
+        # Ok button
+        tk.Button(popSuccess, text='Ok', command=popSuccess.destroy).pack(padx=10, pady=10)
+        # Impossible to minimisze popip 
+        popSuccess.transient(self.window_frame)
+        # Impossible to interact with other elements than the popup
+        popSuccess.grab_set()
+        # Main window wait for popup to be closed
+        self.window.wait_window(popSuccess)
     
     def reset(self):
         for child in self.window_frame.winfo_children():
@@ -148,6 +168,7 @@ class BulkRenamer():
         else:
             i = 0
 
+        nb_files_renamed = 0
         for file in files_and_folders:
             # Get file extension
             extension = os.path.splitext(file)
@@ -159,8 +180,10 @@ class BulkRenamer():
             # Apply new filename
             os.rename(original_file, new_file_name)
             i += 1
+            nb_files_renamed += 1
         
         self.reset()
+        self.success(nb_files_renamed)
             
 
     def stringChecker(self, P, checkType):
